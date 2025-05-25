@@ -30,6 +30,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 
 @Controller
 @RequestMapping("/order")
@@ -225,30 +228,36 @@ public class OrderController {
     }
 
     @GetMapping("/detail/{id}")
-    public String getOrderDetail(@PathVariable("id") int orderId,
-                                 Model model){
-        model.addAttribute("title", "Order detail");
+    public String getOrderDetail(@PathVariable("id") int orderId, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        Order order = orderService.findById(orderId);
+        if (order == null) {
+            // Đơn hàng không tồn tại, trả về trang denied luôn
+            return "access-denied";  // không cần /, tên view access-denied.html
+        }
+        Users user = order.getUser();
 
-        //add list order detail to view
+        // Kiểm tra quyền truy cập
+        if (!user.getEmail().equals(currentUsername) && !hasAdminRole(authentication)) {
+            return "access-denied";
+        }
+
+        model.addAttribute("title", "Order detail");
         List<OrderDetailDto> list = orderDetailService.findAllOrderDetailById(orderId);
         model.addAttribute("list", list);
-
-        //add payment detail to view
         OrderPaymentDto orderPaymentDto = orderDetailService.getOrderPayment(orderId);
         model.addAttribute("payment", orderPaymentDto);
-
-        //add order to view
-        Order order = orderService.findById(orderId);
         model.addAttribute("order", order);
-
-        //add user detail to view
-        Users user = order.getUser();
         model.addAttribute("user", user);
-
-        //add shipper to view
         Shipment shipment = shipmentService.findShipmentByOrderId(orderId);
         model.addAttribute("shipper", shipment);
-
         return "user/order-detail";
     }
+
+    private boolean hasAdminRole(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+    }
+
 }
