@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,6 +51,27 @@ public class WebSecurityConfig {
                         )
                         .exceptionHandling(exception -> exception
                                 .accessDeniedHandler(accessDeniedHandler())
+                        )
+                        .headers(headers -> headers
+                                .contentSecurityPolicy(csp -> csp
+                                        .policyDirectives(
+                                                "default-src 'self'; " +
+                                                        "script-src 'self'; " +  // Cho phép inline scripts
+                                                        "style-src 'self' https://fonts.googleapis.com; " +  // Cho phép inline styles
+                                                        "img-src 'self' https://localhost:8443 data:; " +
+                                                        "font-src 'self' data: https://fonts.gstatic.com; " +
+                                                        "frame-ancestors 'none'; " +
+                                                        "form-action 'self'; " +
+                                                        "base-uri 'self'; " +
+                                                        "object-src 'none'; " +
+                                                        "upgrade-insecure-requests;"
+                                        )
+                                )
+                                .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny  // Chống clickjacking
+                                )
+                                .xssProtection(xss -> {}// Bật XSS protection
+                                )
+                                .contentTypeOptions(content -> {})  // Ngăn MIME type sniffing
                         );
                 //cai nay tu bat nen phai tat
                 //httpSecurity.csrf(AbstractHttpConfigurer::disable);
