@@ -34,9 +34,9 @@ public class FileController {
 
         // 2. Validate file extension
         String extension = getFileExtension(fileName);
-        if (!ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
-            return ResponseEntity.badRequest().build();
-        }
+//        if (!ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
+//            return ResponseEntity.badRequest().build();
+//        }
 
         // 3. Normalize và validate đường dẫn
         Path normalizedPath = Paths.get(UPLOAD_DIR, fileName).normalize();
