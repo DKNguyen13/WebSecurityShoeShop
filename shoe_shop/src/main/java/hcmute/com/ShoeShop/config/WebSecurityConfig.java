@@ -1,5 +1,6 @@
 package hcmute.com.ShoeShop.config;
 
+import hcmute.com.ShoeShop.component.CustomAuthenticationFailureHandler;
 import hcmute.com.ShoeShop.component.CustomAuthenticationSuccessHandler;
 import hcmute.com.ShoeShop.services.imp.CustomUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class WebSecurityConfig {
         @Autowired
         CustomAuthenticationSuccessHandler successHandler;
 
+        @Autowired
+        CustomAuthenticationFailureHandler failureHandler;
+
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
                 httpSecurity.authorizeHttpRequests(request -> request
@@ -41,12 +45,25 @@ public class WebSecurityConfig {
                         .formLogin(formLogin ->
                                 formLogin.loginPage("/login")
                                         .successHandler(successHandler)
-                                        .failureHandler(new SimpleUrlAuthenticationFailureHandler("/login?error=true"))
+                                        .failureHandler(failureHandler)
                                         .permitAll()
+                        )
+                        // Cấu hình quản lý phiên đăng nhập
+                        .sessionManagement(session -> session
+                                .sessionFixation(sessionFixation -> sessionFixation
+                                        .newSession() // Tạo session mới sau khi đăng nhập (chống session fixation)
+                                )
+                                .invalidSessionUrl("/login?session=invalid") // Chuyển hướng khi session không hợp lệ
+                                .maximumSessions(1) // Chỉ cho phép 1 session đăng nhập tại 1 thời điểm
+                                .maxSessionsPreventsLogin(false) // Cho phep login o trinh duyet khac, login cu se bi xoa
                         )
                         //config cho trang logout
                         .logout(logout ->
-                                logout.logoutUrl("/logout").permitAll()
+                                logout
+                                        .invalidateHttpSession(true) // Hủy session
+                                        .deleteCookies("JSESSIONID") // xóa cookie
+                                        .logoutUrl("/logout")
+                                        .permitAll()
                         )
                         .exceptionHandling(exception -> exception
                                 .accessDeniedHandler(accessDeniedHandler())

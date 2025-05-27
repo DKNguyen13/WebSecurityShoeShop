@@ -6,6 +6,7 @@ server:
       cookie:
         same-site: lax
         secure: true
+      timeout: 15m # Het han session sau 15 phut khong hoat đong
   ssl:
     key-store: classpath:shoeshop.jks
     key-store-password: ShoeshopTLS@2025

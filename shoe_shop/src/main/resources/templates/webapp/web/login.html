@@ -88,6 +88,9 @@
         <div th:if="${param.error}" style="color: red; text-align: center; font-size: larger">
             <p>Invalid email or password</p>
         </div>
+        <div th:if="${param.locked}" style="color: red; text-align: center; font-size: larger">
+            <p>Your account has been temporarily locked due to too many failed login attempts. Please try again later.</p>
+        </div>
         <div class="login-area">
             <div class="container">
                 <div class="row">
@@ -101,7 +104,7 @@
                                 <div class="login-form">
                                     <form action="/login" method="post">
                                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                        <input type="text" name="username"  placeholder="Username" th:value="${username}" required>
+                                        <input type="text" name="username"  placeholder="Username" th:value="${username}" maxlength="50" required>
                                         <input type="password" name="password" placeholder="Password" required minlength="6" title="Password must be at least 6 characters long">
                                         <div class="button-box">
                                             <div class="login-toggle-btn">

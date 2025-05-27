@@ -104,6 +104,7 @@ public class RegisterController {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println(e.getMessage());
             return "error";
         }
     }
