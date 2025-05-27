@@ -6,12 +6,17 @@ server:
       cookie:
         same-site: lax
         secure: true
+      timeout: 15m # Het han session sau 15 phut khong hoat đong
   ssl:
     key-store: classpath:shoeshop.jks
     key-store-password: ShoeshopTLS@2025
     key-password: ShoeshopTLS@2025
     key-store-type: JKS
     key-alias: shoeshop
+  error:
+    include-stacktrace: never
+    whitelabel:
+      enabled: false
 
 spring:
   datasource:
@@ -35,8 +40,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: nd2004lk13@gmail.com
-    password: swwa kcsa bbma gvlc
+    username: pdkhoi2004@gmail.com
+    password: rgmb omyr igdy ozqi
     properties:
       mail:
         smtp:
