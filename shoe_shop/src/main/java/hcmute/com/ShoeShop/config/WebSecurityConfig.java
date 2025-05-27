@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -54,6 +55,13 @@ public class WebSecurityConfig {
                 //cai nay tu bat nen phai tat
                 //httpSecurity.csrf(AbstractHttpConfigurer::disable);
                 return httpSecurity.build();
+        }
+
+        @Bean
+        public AuthenticationEntryPoint authenticationEntryPoint() {
+                return (request, response, authException) -> {
+                        response.sendRedirect("/login?error=true");
+                };
         }
 
 
