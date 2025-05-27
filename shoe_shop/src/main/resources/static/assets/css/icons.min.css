@@ -5,6 +5,13 @@
   src: url("../fonts/boxicons.eot");
   src: url("../fonts/boxicons.eot") format("embedded-opentype"), url("../fonts/boxicons.woff2") format("woff2"), url("../fonts/boxicons.woff") format("woff"), url("../fonts/boxicons.ttf") format("truetype"), url("../fonts/boxiconsd41d.svg?#boxicons") format("svg");
 }
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Giữ tỷ lệ và cắt ảnh nếu cần */
+  border-radius: 50%; /* Để làm tròn ảnh */
+}
 .bx {
   font-family: "boxicons" !important;
   font-weight: normal;
@@ -36,6 +43,15 @@
   left: -2em;
   width: 2em;
   text-align: center;
+}
+
+.custom-scroll {
+  max-height: 280px;
+}
+
+.custom-theme-activity {
+  max-width: 450px;
+  width: 100%;
 }
 
 @-webkit-keyframes spin {
