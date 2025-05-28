@@ -15,8 +15,9 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
 
     @Query("SELECT u FROM Users u WHERE u.email = :email")
     Users findByEmail(@Param("email") String email);
-    @Query("SELECT u FROM Users u WHERE LOWER(u.fullname) LIKE LOWER(CONCAT('%', :name, '%')) AND u.role.roleId = :roleid")
-    List<Users> findByRoleIdAndContainName(String name, int roleid);
+    @Query("SELECT u FROM Users u WHERE LOWER(u.fullname) LIKE LOWER(CONCAT('%', :name, '%')) " +
+            "AND u.role.roleId = :roleid")
+    List<Users> findByRoleIdAndContainName(@Param("name") String name, @Param("roleid") int roleid);
     Users findUsersById(int userId);
 
     long countByRole(Role role);
