@@ -7,6 +7,7 @@ import hcmute.com.ShoeShop.services.imp.EmailService;
 import hcmute.com.ShoeShop.services.imp.RoleService;
 import hcmute.com.ShoeShop.services.imp.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,56 +35,96 @@ public class RegisterController {
 
     String tmp_mail = "";
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     @GetMapping("/register")
     public String registerUser(){
         return "web/register";
     }
+
     @PostMapping("/register")
     public String processRegister(@RequestParam("email") String email,
                                   @RequestParam("password") String password,
                                   @RequestParam("fullname") String fullname,
                                   @RequestParam("address") String address,
                                   @RequestParam("verity") String verity,
-                                  @RequestParam("phone") String phone ,
+                                  @RequestParam("phone") String phone,
                                   Model model) {
-        try{
-            Users user = new Users();
-            Address adr = new Address();
-            if(userService.findUserByEmail(email) == null ) {
-                if(verificationCode.equals(verity) && tmp_mail.equals(email)) {
-                    //Add user
-                    user.setEmail(email);
-                    user.setFullname(fullname);
-                    user.setAddress(address);
-                    user.setPass(password);
-                    user.setPhone(phone);
-                    user.setRole(roleService.findRoleById(3));
-                    userService.saveUser(user);
-
-                    //Add address
-                    adr.setUser(user);
-                    adr.setAddress(address);
-                    adr.setIsDefault(true);
-                    addressService.save(adr);
-
-                    return "redirect:/login";
-                }
-                else {
-                    model.addAttribute("mess", "Verity code or email not match");
-                    verificationCode = null;
-                    return "web/register";
-                }
+        try {
+            // Kiểm tra định dạng email
+            if (!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$")) {
+                model.addAttribute("mess", "Invalid email format.");
+                return "web/register";
             }
-            else {
-                model.addAttribute("mess", "Email already in use");
+
+            // Kiểm tra họ tên không được để trống
+            if (fullname == null || fullname.trim().isEmpty()) {
+                model.addAttribute("mess", "Fullname is required.");
+                return "web/register";
+            }
+
+            // Kiểm tra địa chỉ không được để trống
+            if (address == null || address.trim().isEmpty()) {
+                model.addAttribute("mess", "Address is required.");
+                return "web/register";
+            }
+
+            // Kiểm tra số điện thoại hợp lệ (10 chữ số, bắt đầu bằng 0)
+            if (!phone.matches("^0\\d{9}$")) {
+                model.addAttribute("mess", "Invalid phone number format.");
+                return "web/register";
+            }
+
+            // Kiểm tra mật khẩu: ít nhất 6 ký tự, 1 ký tự in hoa, 1 ký tự đặc biệt
+            if (!password.matches("^(?=.*[A-Z])(?=.*[\\W_]).{6,}$")) {
+                model.addAttribute("mess", "Password must be at least 6 characters, contain an uppercase letter and a special character.");
+                return "web/register";
+            }
+
+            // Kiểm tra mã xác thực: đúng 6 chữ số
+            if (!verity.matches("^\\d{6}$")) {
+                model.addAttribute("mess", "Verification code must be exactly 6 digits.");
+                return "web/register";
+            }
+
+            // Kiểm tra email đã tồn tại chưa
+            if (userService.findUserByEmail(email) != null) {
+                model.addAttribute("mess", "Email already in use.");
                 verificationCode = null;
                 return "web/register";
             }
-        }
-        catch(Exception e){
+
+            // Kiểm tra mã xác thực và email
+            if (!verificationCode.equals(verity) || !tmp_mail.equals(email)) {
+                model.addAttribute("mess", "Verification code or email does not match.");
+                verificationCode = null;
+                return "web/register";
+            }
+
+            // Tạo và lưu user
+            Users user = new Users();
+            user.setEmail(email);
+            user.setFullname(fullname);
+            user.setAddress(address);
+            user.setPass(passwordEncoder.encode(password));
+            user.setPhone(phone);
+            user.setRole(roleService.findRoleById(3));
+            userService.saveUser(user);
+
+            // Tạo và lưu địa chỉ mặc định
+            Address adr = new Address();
+            adr.setUser(user);
+            adr.setAddress(address);
+            adr.setIsDefault(true);
+            addressService.save(adr);
+
+            return "redirect:/login";
+
+        } catch (Exception e) {
             e.printStackTrace();
             verificationCode = null;
-            model.addAttribute("mess", "Error");
+            model.addAttribute("mess", "An unexpected error occurred.");
             return "web/register";
         }
     }
@@ -105,7 +146,7 @@ public class RegisterController {
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
-            return "error";
+            return "error" + e.getMessage();
         }
     }
 

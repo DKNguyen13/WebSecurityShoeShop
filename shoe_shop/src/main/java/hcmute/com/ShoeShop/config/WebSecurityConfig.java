@@ -49,6 +49,7 @@ public class WebSecurityConfig {
                                         .failureHandler(failureHandler)
                                         .permitAll()
                         )
+
                         // Cấu hình quản lý phiên đăng nhập
                         .sessionManagement(session -> session
                                 .sessionFixation(sessionFixation -> sessionFixation
@@ -68,7 +69,9 @@ public class WebSecurityConfig {
                         )
                         .exceptionHandling(exception -> exception
                                 .accessDeniedHandler(accessDeniedHandler())
-                        );
+                        )
+                        // ✅ Bỏ qua CSRF cho đường dẫn /send-code
+                        .csrf(csrf -> csrf.ignoringRequestMatchers("/send-code"));
                 //cai nay tu bat nen phai tat
                 //httpSecurity.csrf(AbstractHttpConfigurer::disable);
                 return httpSecurity.build();
