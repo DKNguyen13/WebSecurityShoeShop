@@ -257,7 +257,7 @@ public class OrderController {
 
     private boolean hasAdminRole(Authentication authentication) {
         return authentication.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_admin"));
     }
 
 }
